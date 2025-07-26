@@ -140,21 +140,19 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-    fetch('get_products.php')
-        .then(response => response.json())
-        .then(products => {
-            allProducts = products;
-        });
-
     categorySelect.addEventListener('change', function() {
         const selectedCategory = this.value;
         productSelect.innerHTML = '';
+
         if (selectedCategory) {
-            const filteredProducts = allProducts.filter(product => product.category === selectedCategory);
-            filteredProducts.forEach(product => {
-                const option = new Option(product.name, product.id);
-                productSelect.add(option);
-            });
+            fetch(`get_products_by_category.php?category=${selectedCategory}`)
+                .then(response => response.json())
+                .then(products => {
+                    products.forEach(product => {
+                        const option = new Option(product.name, product.id);
+                        productSelect.add(option);
+                    });
+                });
         }
     });
 
