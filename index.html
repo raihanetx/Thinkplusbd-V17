@@ -670,6 +670,15 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             height: 40px;
             border-radius: 50%;
             margin-right: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            flex-shrink: 0;
         }
         .review-name {
             font-weight: 600;
@@ -2270,6 +2279,30 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             setupImageLoading();
         }
 
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        }
+
+        function getAvatarColor(name) {
+            const colors = [
+                '#8F87F1', // Primary color
+                '#6C63FF', 
+                '#4ECDC4', 
+                '#45B7D1', 
+                '#96CEB4', 
+                '#FFEAA7', 
+                '#DDA0DD', 
+                '#98D8C8', 
+                '#F7DC6F', 
+                '#BB8FCE'
+            ];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
         async function fetchAndDisplayReviews(productId, container) {
             try {
                 const response = await fetch(`get_approved_reviews.php?product_id=${productId}`);
@@ -2277,10 +2310,12 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                 let reviewsHTML = '';
                 if (reviews.length > 0) {
                     reviews.forEach(review => {
+                        const initials = getInitials(review.name);
+                        const avatarColor = getAvatarColor(review.name);
                         reviewsHTML += `
                             <div class="review">
                                 <div class="review-author">
-                                    <img src="https://i.postimg.cc/4NtztqPt/IMG-20250603-130207-removebg-preview-1.png" alt="User Avatar" class="review-avatar">
+                                    <div class="review-avatar" style="background-color: ${avatarColor};">${initials}</div>
                                     <span class="review-name">${review.name}</span>
                                 </div>
                                 <div class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
