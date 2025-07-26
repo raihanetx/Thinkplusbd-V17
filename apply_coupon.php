@@ -1,5 +1,4 @@
 <?php
-header('Content-Type: application/json');
 $input = json_decode(file_get_contents('php://input'), true);
 $coupon_code = isset($input['coupon_code']) ? trim($input['coupon_code']) : '';
 $cart_items = isset($input['cart']) ? $input['cart'] : [];
@@ -24,9 +23,20 @@ if (!empty($coupon_code) && !empty($cart_items)) {
                         $apply_discount = true;
                     }
                     if ($apply_discount) {
-                        $total_discount += ($item['price'] * $item['quantity'] * $coupon['discount_percentage']) / 100;
+                        if ($coupon['discount_type'] === 'percentage') {
+                            $total_discount += ($item['price'] * $item['quantity'] * $coupon['discount_value']) / 100;
+                        } elseif ($coupon['discount_type'] === 'fixed') {
+                            // Apply fixed discount once per eligible item/category, not per quantity
+                            $total_discount += $coupon['discount_value'];
+                        }
                     }
                 }
+
+                // Ensure discount does not exceed the original total
+                if ($total_discount > $original_total) {
+                    $total_discount = $original_total;
+                }
+
                 echo json_encode(['success' => true, 'discount' => $total_discount, 'new_total' => $original_total - $total_discount]);
                 exit();
             }
